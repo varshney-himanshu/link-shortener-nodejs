@@ -1,22 +1,31 @@
 import { TransactionManager } from "../../shared/database/transaction-manager";
-import CreateShortUrlResponseDto from "./dto/create-short-url-response.dto";
+import { Base62 } from "../../utils/base62";
+import { CreateOriginalUrlResponseDto, CreateShortUrlResponseDto } from "./dto/create-url-response.dto";
 
 import { UrlRepository } from "./url.repository";
+
 class UrlService {
   constructor(
     private readonly respository: UrlRepository,
     private readonly transactionManager: TransactionManager,
   ) {}
 
-  createShortUrl = async (): Promise<CreateShortUrlResponseDto> => {
-    // TODO: Save the original url to the datastore
-    // TODO: retreive the unique id of the saved url
-    // TODO: encode the unique id to base62 string
-    // TODO: return the short url by appending the base62 string to the domain name
+  createShortUrl = async (originalUrl: string): Promise<string> => {
+    return this.transactionManager.runInTransaction(async (dbclient) => {
+      const { id } = await this.respository.create({ url: originalUrl }, dbclient);
 
-    return {
-      url: "",
-    };
+      let shortCode = Base62.encode(id);
+
+      await this.respository.updateShortCode(shortCode, id);
+
+      return `http://localhost:8000/${shortCode}`;
+    });
+  };
+
+  fetchOriginalUrl = async (shortCode: string): Promise<string> => {
+    const { original_url } = await this.respository.fetchOriginalUrl(shortCode);
+
+    return original_url;
   };
 }
 

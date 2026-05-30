@@ -1,11 +1,8 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
+import { controller as urlController } from "../modules/url/url.module";
 
 const redirectRouter = Router();
 
-redirectRouter.get("/:shortUrl", (req: Request, res: Response) => {
-  const { shortUrl } = req.params;
-
-  res.redirect("https://www.google.com");
-});
+redirectRouter.get("/:shortCode", urlController.redirecttoOriginalUrl);
 
 export default redirectRouter;

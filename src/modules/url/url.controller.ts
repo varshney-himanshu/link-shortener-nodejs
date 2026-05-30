@@ -1,8 +1,10 @@
 import ApiResponse from "../../shared/types/api-response.type";
 import CreateShortUrlDto from "./dto/create-short-url-request.dto";
-import CreateShortUrlResponseDto from "./dto/create-short-url-response.dto";
+import { CreateShortUrlResponseDto } from "./dto/create-url-response.dto";
 import UrlService from "./url.service";
 import { Request, Response, NextFunction } from "express";
+
+import { RedirectParams } from "./url.types";
 
 class UrlController {
   constructor(private readonly urlService: UrlService) {}
@@ -13,27 +15,27 @@ class UrlController {
     next: NextFunction,
   ) => {
     try {
-      const shortUrl: CreateShortUrlResponseDto = await this.urlService.createShortUrl();
+      const originalUrl = req.body.url;
+
+      const shortUrl: string = await this.urlService.createShortUrl(originalUrl);
 
       return res.status(200).json({
         success: true,
         message: "Short URL created successfully",
-        data: shortUrl,
+        data: { shortUrl },
       });
     } catch (error) {
       next(error);
     }
   };
 
-  redirecttoOriginalUrl = async (req: Request, res: Response<ApiResponse<CreateShortUrlResponseDto>>, next: NextFunction) => {
-    try {
-      const shortUrl: CreateShortUrlResponseDto = await this.urlService.createShortUrl();
+  redirecttoOriginalUrl = async (req: Request<RedirectParams>, res: Response, next: NextFunction) => {
+    const { shortCode } = req.params;
 
-      return res.status(200).json({
-        success: true,
-        message: "Short URL created successfully",
-        data: shortUrl,
-      });
+    try {
+      const originalUrl = await this.urlService.fetchOriginalUrl(shortCode);
+
+      return res.redirect(originalUrl);
     } catch (error) {
       next(error);
     }
