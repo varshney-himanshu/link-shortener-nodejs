@@ -26,12 +26,20 @@ export class UrlRepository {
     `;
 
     let values = [shortCode, id];
+    console.log("Updating short code with values:", values);
 
-    await client.query(query, values);
+    let result = await client.query(query, values);
+    console.log("Update short code result:", result);
+
+    if (result.rowCount === 0) {
+      throw new Error("Failed to update short code");
+    }
   }
 
   async fetchOriginalUrl(shortCode: string, client: DbExecutor = this.db): Promise<CreateOriginalUrl> {
     // TODO: Figure out how to optimize the search query so its fast - indexing???
+
+    console.log("Fetching original URL for short code:", shortCode);
 
     let query = `
     SELECT original_url FROM urls 
@@ -41,6 +49,10 @@ export class UrlRepository {
     let values = [shortCode];
 
     let result = await client.query<CreateOriginalUrl>(query, values);
+
+    if (result.rows.length === 0) {
+      throw new Error("Short code not found");
+    }
 
     return result.rows[0];
   }

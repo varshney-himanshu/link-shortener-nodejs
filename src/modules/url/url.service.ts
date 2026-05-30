@@ -16,7 +16,7 @@ class UrlService {
 
       let shortCode = Base62.encode(id);
 
-      await this.respository.updateShortCode(shortCode, id);
+      await this.respository.updateShortCode(shortCode, id, dbclient);
 
       return `http://localhost:8000/${shortCode}`;
     });
