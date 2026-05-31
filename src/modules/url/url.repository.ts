@@ -1,5 +1,6 @@
 import CreateShortUrlDto from "./dto/create-short-url-request.dto";
-import { CreateUrlRecordId, CreateOriginalUrl, DbExecutor } from "./url.types";
+import { CreateUrlRecordId, CreateOriginalUrl } from "./url.types";
+import { DbExecutor } from "../../shared/types/db";
 
 export class UrlRepository {
   constructor(private readonly db: DbExecutor) {}
@@ -18,7 +19,7 @@ export class UrlRepository {
     return result.rows[0];
   }
 
-  async updateShortCode(shortCode: string, id: Number, client: DbExecutor = this.db) {
+  async updateShortCode(shortCode: string, id: number, client: DbExecutor = this.db) {
     let query = `
     UPDATE urls 
     SET short_code = $1
@@ -26,10 +27,8 @@ export class UrlRepository {
     `;
 
     let values = [shortCode, id];
-    console.log("Updating short code with values:", values);
 
     let result = await client.query(query, values);
-    console.log("Update short code result:", result);
 
     if (result.rowCount === 0) {
       throw new Error("Failed to update short code");
@@ -38,8 +37,6 @@ export class UrlRepository {
 
   async fetchOriginalUrl(shortCode: string, client: DbExecutor = this.db): Promise<CreateOriginalUrl> {
     // TODO: Figure out how to optimize the search query so its fast - indexing???
-
-    console.log("Fetching original URL for short code:", shortCode);
 
     let query = `
     SELECT original_url FROM urls 

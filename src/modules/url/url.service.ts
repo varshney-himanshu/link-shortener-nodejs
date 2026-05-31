@@ -1,13 +1,13 @@
-import { TransactionManager } from "../../shared/database/transaction-manager";
+import config from "../../config/config";
+import { PostgresTransactionManager } from "../../shared/database/postgres-transaction-manager";
 import { Base62 } from "../../utils/base62";
-import { CreateOriginalUrlResponseDto, CreateShortUrlResponseDto } from "./dto/create-url-response.dto";
 
 import { UrlRepository } from "./url.repository";
 
 class UrlService {
   constructor(
     private readonly respository: UrlRepository,
-    private readonly transactionManager: TransactionManager,
+    private readonly transactionManager: PostgresTransactionManager,
   ) {}
 
   createShortUrl = async (originalUrl: string): Promise<string> => {
@@ -18,7 +18,7 @@ class UrlService {
 
       await this.respository.updateShortCode(shortCode, id, dbclient);
 
-      return `http://localhost:8000/${shortCode}`;
+      return `${config.baseUrl}/${shortCode}`;
     });
   };
 

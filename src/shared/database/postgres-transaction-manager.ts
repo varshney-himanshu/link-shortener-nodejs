@@ -1,7 +1,6 @@
 import { Pool, PoolClient } from "pg";
-import { TransactionManager } from "./transaction-manager";
 
-export class PostgresTransactionManager implements TransactionManager {
+export class PostgresTransactionManager {
   constructor(private readonly db: Pool) {}
 
   async runInTransaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
