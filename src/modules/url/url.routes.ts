@@ -7,4 +7,6 @@ const urlRoutes = Router();
 
 urlRoutes.post("/create", validate(createShortUrlSchema), controller.createShortUrl);
 
+urlRoutes.get("/info/:shortCode", controller.getShortUrlInfo);
+
 export default urlRoutes;

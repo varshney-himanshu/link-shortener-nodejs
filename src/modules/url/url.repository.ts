@@ -1,5 +1,5 @@
 import CreateShortUrlDto from "./dto/create-short-url-request.dto";
-import { CreateUrlRecordId, CreateOriginalUrl } from "./url.types";
+import { CreateUrlRecordId, CreateOriginalUrl, CreateShortUrlInfo } from "./url.types";
 import { DbExecutor } from "../../shared/types/db";
 import { AppError } from "../../shared/errors/app-errors";
 
@@ -50,6 +50,35 @@ export class UrlRepository {
     let values = [shortCode];
 
     let result = await this.db.query<CreateOriginalUrl>(query, values);
+
+    if (result.rows.length === 0) {
+      throw new AppError("Short url not found", 404);
+    }
+
+    return result.rows[0];
+  }
+
+  async incrementClickCount(shortCode: string, client: DbExecutor = this.db) {
+    let query = `
+    UPDATE urls 
+    SET clicks = clicks + 1
+    WHERE short_code = $1
+    `;
+
+    let values = [shortCode];
+
+    await client.query(query, values);
+  }
+
+  async fetchShortCodeInfo(shortCode: string): Promise<CreateShortUrlInfo> {
+    let query = `
+    SELECT original_url, clicks FROM urls 
+    WHERE short_code = $1
+    `;
+
+    let values = [shortCode];
+
+    let result = await this.db.query<CreateShortUrlInfo>(query, values);
 
     if (result.rows.length === 0) {
       throw new AppError("Short url not found", 404);

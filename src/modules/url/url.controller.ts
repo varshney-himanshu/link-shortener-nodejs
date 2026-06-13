@@ -40,6 +40,22 @@ class UrlController {
       next(error);
     }
   };
+
+  getShortUrlInfo = async (req: Request<RedirectParams>, res: Response<ApiResponse<{ originalUrl: string; clicks: number }>>, next: NextFunction) => {
+    const { shortCode } = req.params;
+
+    try {
+      const { original_url, clicks } = await this.urlService.fetchShortUrlInfo(shortCode);
+
+      return res.status(200).json({
+        success: true,
+        message: "Short URL info fetched successfully",
+        data: { originalUrl: original_url, clicks },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default UrlController;

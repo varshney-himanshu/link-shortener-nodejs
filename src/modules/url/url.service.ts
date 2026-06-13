@@ -25,7 +25,19 @@ class UrlService {
   fetchOriginalUrl = async (shortCode: string): Promise<string> => {
     const { original_url } = await this.respository.fetchOriginalUrl(shortCode);
 
+    // can be optimized by create a non blocking event-queue to update click count instead of doing it in request flow
+
+    if (original_url) {
+      this.respository.incrementClickCount(shortCode);
+    }
+
     return original_url;
+  };
+
+  fetchShortUrlInfo = async (shortCode: string): Promise<{ original_url: string; clicks: number }> => {
+    const { original_url, clicks } = await this.respository.fetchShortCodeInfo(shortCode);
+
+    return { original_url, clicks };
   };
 }
 
